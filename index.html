@@ -3,12 +3,13 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Word Imposter Pro 😂</title>
+<title>Story Imposter 😂</title>
 <style>
 *{box-sizing:border-box;font-family:Inter,system-ui,sans-serif}
 body{
   margin:0;min-height:100vh;color:white;
-  background:radial-gradient(circle at top,#ec489955,transparent 35%),
+  background:radial-gradient(circle at top left,#f9731655,transparent 35%),
+  radial-gradient(circle at bottom right,#06b6d455,transparent 35%),
   linear-gradient(135deg,#020617,#312e81,#831843);
 }
 .wrap{max-width:900px;margin:auto;padding:18px}
@@ -38,27 +39,33 @@ button:hover{transform:scale(1.02)}
   padding:18px;
   text-align:center;
 }
-.big{font-size:34px;font-weight:900}
+.big{font-size:32px;font-weight:900}
 .small{color:#e5e7eb}
 .badge{
   display:inline-block;background:#22c55e;color:#052e16;
   padding:7px 13px;border-radius:999px;
   font-weight:900;font-size:12px;
 }
+.story{
+  font-size:18px;
+  line-height:1.6;
+  text-align:left;
+}
 </style>
 </head>
-<body>
 
+<body>
 <div class="wrap">
 
 <div class="card">
-  <span class="badge">FUNNY PARTY GAME</span>
-  <h1>Word Imposter Pro 😂</h1>
-  <p class="small">Same word for everyone. One imposter gets only a hint. Each round has a question to expose them.</p>
+  <span class="badge">STORY MODE PARTY GAME</span>
+  <h1>Story Imposter 😂</h1>
+  <p class="small">Everyone gets the same secret word. One imposter gets only a hint. Story, questions, twists, missions and voting.</p>
 </div>
 
 <div id="setup" class="card">
-  <h2>Setup</h2>
+  <h2>Game Setup</h2>
+
   <select id="playerCount" onchange="makeInputs()">
     <option value="3">3 Players</option>
     <option value="4">4 Players</option>
@@ -70,20 +77,26 @@ button:hover{transform:scale(1.02)}
 
   <div id="nameInputs"></div>
 
-  <select id="category">
-    <option value="funny">Funny</option>
-    <option value="food">Food</option>
-    <option value="upsc">UPSC Macha Mode</option>
-    <option value="love">Relationship Drama</option>
-    <option value="chaos">Random Chaos</option>
+  <select id="mode">
+    <option value="flat">Flat Crime Scene</option>
+    <option value="upsc">UPSC Interview Room</option>
+    <option value="love">Relationship Court</option>
+    <option value="hostel">Hostel Night Mystery</option>
+    <option value="food">Food War</option>
   </select>
 
-  <button onclick="startGame()">Start Game 🚀</button>
+  <button onclick="startGame()">Start Story Game 🚀</button>
+</div>
+
+<div id="storyScreen" class="card hidden">
+  <h2>🎭 Story Begins</h2>
+  <div id="storyText" class="box story"></div>
+  <button class="green" onclick="goReveal()">Reveal Secret Words 👀</button>
 </div>
 
 <div id="reveal" class="card hidden">
   <h2>Secret Reveal</h2>
-  <p class="small">Pass phone secretly. Don’t peep, dei.</p>
+  <p class="small">Pass phone secretly. Don’t let others see.</p>
 
   <div class="box">
     <div id="currentPlayer" class="big"></div>
@@ -97,20 +110,21 @@ button:hover{transform:scale(1.02)}
   <h2 id="roundTitle">Round 1</h2>
 
   <div class="box">
-    <p class="small">Question to test the imposter:</p>
+    <p class="small">Question to expose the imposter:</p>
     <div id="roundQuestion" class="big"></div>
   </div>
 
-  <button class="purple" onclick="nextQuestion()">Next Round Question 🔥</button>
-  <button class="blue" onclick="showHint()">Show Public Hint</button>
+  <div id="twistBox" class="box hidden"></div>
+
+  <button class="purple" onclick="nextQuestion()">Next Round 🔥</button>
+  <button class="blue" onclick="showPublicHint()">Show Public Hint 🧠</button>
   <button class="red" onclick="goVote()">Vote Imposter 🗳️</button>
 
   <div id="publicHint" class="box hidden"></div>
 </div>
 
 <div id="voteScreen" class="card hidden">
-  <h2>Vote Now 🕵️</h2>
-  <p class="small">Choose the person who acted most suspicious.</p>
+  <h2>Vote the Imposter 🕵️</h2>
   <div id="voteButtons"></div>
   <div id="result" class="box hidden"></div>
 </div>
@@ -118,75 +132,143 @@ button:hover{transform:scale(1.02)}
 </div>
 
 <script>
-let players=[], scores=[], wordObj={}, imposter=0, current=0, round=1;
+let players=[], scores=[], selected={}, imposter=0, current=0, round=1;
 
-const data = {
- funny:[
-  {word:"Bathroom Singer",hint:"Related to private concert"},
-  {word:"Silent Fart",hint:"Danger without sound"},
-  {word:"Fake Laugh",hint:"Social survival tool"},
-  {word:"Bad Haircut",hint:"Mirror trauma"},
-  {word:"WiFi Thief",hint:"Neighbourhood criminal"},
-  {word:"Overacting Friend",hint:"Drama unlimited"}
- ],
- food:[
-  {word:"Biryani",hint:"Rice item with emotions"},
-  {word:"Parotta",hint:"Layered happiness"},
-  {word:"Momos",hint:"Delhi street addiction"},
-  {word:"Curd Rice",hint:"South Indian peace treaty"},
-  {word:"Maggi",hint:"2 minute lie"},
-  {word:"Pani Puri",hint:"Crispy water bomb"}
+const stories = {
+ flat:[
+  {
+   story:"The flat WiFi suddenly stopped. Everyone is blaming everyone. Someone secretly changed something near the internet setup.",
+   word:"Router",
+   hint:"Internet related object"
+  },
+  {
+   story:"Garbage smell is spreading in the flat. Everyone says they threw the garbage. One person is lying with full confidence.",
+   word:"Dustbin",
+   hint:"Waste related thing"
+  },
+  {
+   story:"EB bill came very high. One roommate says, 'I barely used AC.' Suspicion level is 100.",
+   word:"AC Remote",
+   hint:"Cooling related item"
+  }
  ],
  upsc:[
-  {word:"Laxmikanth",hint:"Polity bible"},
-  {word:"CSAT",hint:"Dream killer paper"},
-  {word:"Current Affairs",hint:"Never ending headache"},
-  {word:"Prelims",hint:"OMR battlefield"},
-  {word:"Optional",hint:"Second marriage of UPSC"},
-  {word:"Revision",hint:"Forgotten again"}
+  {
+   story:"UPSC interview panel suspects one fake aspirant entered the room. Everyone must prove they are real aspirants.",
+   word:"Laxmikanth",
+   hint:"Polity related book"
+  },
+  {
+   story:"Prelims result came. Everyone is pretending they studied seriously. One person doesn’t even know the basic word.",
+   word:"CSAT",
+   hint:"Exam paper related"
+  },
+  {
+   story:"Library discussion became serious. Someone is using big words without understanding anything.",
+   word:"Current Affairs",
+   hint:"Daily study topic"
+  }
  ],
  love:[
-  {word:"Seen Zone",hint:"Pain without words"},
-  {word:"Sorry Message",hint:"Long paragraph weapon"},
-  {word:"Jealousy",hint:"Love with detective mode"},
-  {word:"Late Reply",hint:"Relationship earthquake"},
-  {word:"Miss You",hint:"Midnight weakness"},
-  {word:"Breakup Drama",hint:"Tears and typing"}
+  {
+   story:"Relationship Court is open. Someone said 'I slept early' but was online till 2 AM.",
+   word:"Seen Zone",
+   hint:"Chat related pain"
+  },
+  {
+   story:"A sorry message was sent. Everyone is judging whether it is real emotion or copy paste drama.",
+   word:"Apology",
+   hint:"Used after mistake"
+  },
+  {
+   story:"One person is acting cool, but secretly jealous. Court must find the fake lover.",
+   word:"Jealousy",
+   hint:"Love detective feeling"
+  }
  ],
- chaos:[
-  {word:"Zombie Uncle",hint:"Family horror"},
-  {word:"Angry Pigeon",hint:"Flying rowdy"},
-  {word:"Dancing Chair",hint:"Furniture with talent"},
-  {word:"Alien Cow",hint:"Space animal"},
-  {word:"Suspicious Roommate",hint:"Flat investigation"},
-  {word:"Lazy Ghost",hint:"Haunting postponed"}
+ hostel:[
+  {
+   story:"At 2 AM, someone ate Maggi from the common shelf. Nobody accepts the crime.",
+   word:"Maggi",
+   hint:"Midnight food"
+  },
+  {
+   story:"Someone was singing in the bathroom like Arijit Singh. Whole hostel suffered.",
+   word:"Bathroom Singer",
+   hint:"Private concert"
+  },
+  {
+   story:"A ghost is roaming in hostel, but it is too lazy to scare properly.",
+   word:"Lazy Ghost",
+   hint:"Paranormal but slow"
+  }
+ ],
+ food:[
+  {
+   story:"The last biryani piece is missing. All friends are suspects. Investigation begins.",
+   word:"Biryani",
+   hint:"Rice item with emotions"
+  },
+  {
+   story:"Someone dipped momo in all the chutney and finished it. Friendship is now in danger.",
+   word:"Momos",
+   hint:"Street food"
+  },
+  {
+   story:"The dosa came crispy, but someone stole the best piece before photo was taken.",
+   word:"Dosa",
+   hint:"South Indian food"
+  }
  ]
 };
 
 const questions = [
  "Describe it using only one emotion.",
- "Where will you find this in real life?",
- "Would you keep this in your room? Why?",
- "Explain it like you are lying to your parents.",
+ "Where will you usually find this?",
+ "What happens if this disappears?",
+ "Who in this group needs this the most?",
+ "Explain it like you are lying to your landlord.",
  "Give one benefit without saying the word.",
  "Rate it out of 10 and explain.",
- "What type of person likes this?",
- "Can this survive in Delhi rent life?",
  "Compare it with your ex.",
  "What sound would it make?",
- "What would happen if this became Prime Minister?",
+ "Would your mom approve this?",
  "Use one Tamil/Hindi slang to describe it.",
- "Is this dangerous after midnight?",
- "Would you gift this to your crush?",
- "Explain it in 5 words only."
+ "Explain it in exactly 5 words.",
+ "Would this survive in Delhi rent life?",
+ "Make a fake advertisement for it.",
+ "Why is this dangerous after midnight?"
+];
+
+const twists = [
+ "Twist: Everyone must answer in 5 words only.",
+ "Twist: Answer like a politician avoiding the question.",
+ "Twist: Answer in emotional movie dialogue style.",
+ "Twist: Answer like you are hiding something.",
+ "Twist: Answer with full confidence, even if you are confused.",
+ "Twist: No English allowed for this answer.",
+ "Twist: Answer like a strict UPSC interview panel.",
+ "Twist: Answer like a heartbroken lover.",
+ "Twist: Everyone must roast one other player while answering.",
+ "Twist: Answer like your parents are listening."
+];
+
+const imposterMissions = [
+ "Mission: Act confident and ask one counter-question.",
+ "Mission: Blame another player subtly.",
+ "Mission: Use the public hint and pretend you know more.",
+ "Mission: Give a vague answer but sound intellectual.",
+ "Mission: Laugh first, then answer slowly.",
+ "Mission: Say 'obviously' at least once.",
+ "Mission: Make others confused instead of proving yourself."
 ];
 
 const roasts = [
  "Caught like thief stealing hostel Maggi 😂",
- "Imposter acted like UPSC topper without syllabus 🤡",
+ "Imposter confidence was higher than EB bill 😭",
+ "Acting level: TV serial villain 🤡",
  "Full drama, zero knowledge 😂",
- "Sherlock Holmes would be proud macha 🕵️",
- "Imposter confidence was higher than EB bill 😭"
+ "Sherlock Holmes would be proud macha 🕵️"
 ];
 
 function makeInputs(){
@@ -205,12 +287,28 @@ function startGame(){
   players.push(document.getElementById("p"+i).value || `Player ${i+1}`);
   scores.push(0);
  }
- let list=data[category.value];
- wordObj=list[Math.floor(Math.random()*list.length)];
- imposter=Math.floor(Math.random()*players.length);
- current=0; round=1;
+
+ pickNewStory();
 
  setup.classList.add("hidden");
+ storyScreen.classList.remove("hidden");
+
+ storyText.innerHTML = `
+  <b>Case:</b><br>${selected.story}<br><br>
+  <b>Rule:</b> Don’t say the exact word. Talk, suspect, confuse and expose the imposter.
+ `;
+}
+
+function pickNewStory(){
+ let list=stories[mode.value];
+ selected=list[Math.floor(Math.random()*list.length)];
+ imposter=Math.floor(Math.random()*players.length);
+ current=0;
+ round=1;
+}
+
+function goReveal(){
+ storyScreen.classList.add("hidden");
  reveal.classList.remove("hidden");
  updateReveal();
 }
@@ -222,14 +320,16 @@ function updateReveal(){
 
 function showSecret(){
  if(current===imposter){
+  let mission=imposterMissions[Math.floor(Math.random()*imposterMissions.length)];
   secretText.innerHTML=`
    <div class="big">YOU ARE IMPOSTER 😈</div>
-   <p>Hint: <b>${wordObj.hint}</b></p>
-   <p class="small">Act confident. Don’t overact like serial villain.</p>
+   <p>Hint: <b>${selected.hint}</b></p>
+   <p><b>${mission}</b></p>
+   <p class="small">Don’t overact like serial villain.</p>
   `;
  }else{
   secretText.innerHTML=`
-   <div class="big">${wordObj.word}</div>
+   <div class="big">${selected.word}</div>
    <p class="small">Don’t say the exact word.</p>
   `;
  }
@@ -240,13 +340,17 @@ function nextReveal(){
  if(current>=players.length){
   reveal.classList.add("hidden");
   roundScreen.classList.remove("hidden");
-  loadQuestion();
- }else updateReveal();
+  loadRound();
+ }else{
+  updateReveal();
+ }
 }
 
-function loadQuestion(){
+function loadRound(){
  roundTitle.innerHTML=`Round ${round}`;
  roundQuestion.innerHTML=questions[Math.floor(Math.random()*questions.length)];
+ twistBox.classList.remove("hidden");
+ twistBox.innerHTML=twists[Math.floor(Math.random()*twists.length)];
  publicHint.classList.add("hidden");
 }
 
@@ -255,22 +359,23 @@ function nextQuestion(){
  if(round>5){
   goVote();
  }else{
-  loadQuestion();
+  loadRound();
  }
 }
 
-function showHint(){
+function showPublicHint(){
  publicHint.classList.remove("hidden");
  publicHint.innerHTML=`
   <h3>Public Hint 🧠</h3>
-  <p>${wordObj.hint}</p>
-  <p class="small">Careful: imposter also knows this hint.</p>
+  <p>${selected.hint}</p>
+  <p class="small">Warning: Imposter already knows this hint.</p>
  `;
 }
 
 function goVote(){
  roundScreen.classList.add("hidden");
  voteScreen.classList.remove("hidden");
+
  voteButtons.innerHTML="";
  players.forEach((p,i)=>{
   voteButtons.innerHTML += `<button onclick="vote(${i})">${p}</button>`;
@@ -287,23 +392,24 @@ function vote(i){
   });
 
   result.innerHTML=`
-   <h2>Correct! 😂</h2>
+   <h2>Correct 😂</h2>
    <p><b>${players[imposter]}</b> was the imposter.</p>
-   <p>Word was: <b>${wordObj.word}</b></p>
+   <p>Secret word: <b>${selected.word}</b></p>
    <p>${roast}</p>
    ${scoreBoard()}
-   <button onclick="newRound()">Next Game</button>
+   <button onclick="nextGame()">Next Story</button>
   `;
  }else{
   scores[imposter]+=2;
+
   result.innerHTML=`
    <h2>Wrong Vote 🤡</h2>
    <p>You blamed <b>${players[i]}</b>.</p>
    <p>Real imposter: <b>${players[imposter]}</b></p>
-   <p>Word was: <b>${wordObj.word}</b></p>
+   <p>Secret word: <b>${selected.word}</b></p>
    <p>Imposter escaped like rent due date 😭</p>
    ${scoreBoard()}
-   <button onclick="newRound()">Next Game</button>
+   <button onclick="nextGame()">Next Story</button>
   `;
  }
 }
@@ -311,21 +417,27 @@ function vote(i){
 function scoreBoard(){
  let html="<hr><h3>Scoreboard 🏆</h3>";
  players.forEach((p,i)=>{
-  html += `${p}: ${scores[i]} points<br>`;
+  let title = "";
+  if(scores[i]>=6) title=" 👑 Master Liar";
+  else if(scores[i]>=4) title=" 🕵️ Flat Sherlock";
+  else if(scores[i]>=2) title=" 🔥 Drama Player";
+
+  html += `${p}: ${scores[i]} points ${title}<br>`;
  });
  return html;
 }
 
-function newRound(){
- let list=data[category.value];
- wordObj=list[Math.floor(Math.random()*list.length)];
- imposter=Math.floor(Math.random()*players.length);
- current=0; round=1;
-
+function nextGame(){
  voteScreen.classList.add("hidden");
  result.classList.add("hidden");
- reveal.classList.remove("hidden");
- updateReveal();
+
+ pickNewStory();
+
+ storyScreen.classList.remove("hidden");
+ storyText.innerHTML = `
+  <b>New Case:</b><br>${selected.story}<br><br>
+  <b>Rule:</b> Don’t say the exact word. Find the imposter.
+ `;
 }
 </script>
 
