@@ -3,68 +3,47 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Word Imposter 😂</title>
+<title>Word Imposter Pro 😂</title>
 <style>
 *{box-sizing:border-box;font-family:Inter,system-ui,sans-serif}
 body{
-  margin:0;
-  min-height:100vh;
-  background:linear-gradient(135deg,#111827,#581c87,#be123c);
-  color:white;
+  margin:0;min-height:100vh;color:white;
+  background:radial-gradient(circle at top,#ec489955,transparent 35%),
+  linear-gradient(135deg,#020617,#312e81,#831843);
 }
-.wrap{max-width:900px;margin:auto;padding:20px}
+.wrap{max-width:900px;margin:auto;padding:18px}
 .card{
   background:rgba(255,255,255,.14);
   border:1px solid rgba(255,255,255,.22);
   border-radius:28px;
-  padding:22px;
-  margin:16px 0;
+  padding:22px;margin:15px 0;
   backdrop-filter:blur(18px);
-  box-shadow:0 20px 60px rgba(0,0,0,.3);
+  box-shadow:0 20px 60px rgba(0,0,0,.32);
 }
-h1{font-size:40px;margin:5px 0}
+h1{font-size:38px;margin:6px 0}
 input,select,button{
-  width:100%;
-  padding:14px;
-  border:none;
-  border-radius:16px;
-  margin:8px 0;
-  font-size:16px;
+  width:100%;padding:14px;margin:8px 0;
+  border:0;border-radius:16px;font-size:16px;
 }
-button{
-  background:#fde047;
-  font-weight:900;
-  cursor:pointer;
-}
+button{background:#fde047;font-weight:900;cursor:pointer}
 button:hover{transform:scale(1.02)}
-.red{background:#fb7185;color:white}
-.green{background:#86efac;color:#052e16}
 .blue{background:#7dd3fc;color:#082f49}
+.green{background:#86efac;color:#052e16}
+.red{background:#fb7185;color:white}
+.purple{background:#c084fc;color:white}
 .hidden{display:none}
-.playerBox{
-  background:rgba(0,0,0,.25);
+.box{
+  background:rgba(0,0,0,.28);
+  border-radius:22px;
   padding:18px;
-  border-radius:20px;
-  margin-top:14px;
   text-align:center;
 }
-.big{font-size:38px;font-weight:900}
+.big{font-size:34px;font-weight:900}
 .small{color:#e5e7eb}
 .badge{
-  display:inline-block;
-  padding:6px 12px;
-  border-radius:999px;
-  background:#22c55e;
-  color:#052e16;
-  font-weight:900;
-  font-size:12px;
-}
-.names span{
-  display:inline-block;
-  background:rgba(255,255,255,.18);
-  padding:8px 12px;
-  border-radius:999px;
-  margin:5px;
+  display:inline-block;background:#22c55e;color:#052e16;
+  padding:7px 13px;border-radius:999px;
+  font-weight:900;font-size:12px;
 }
 </style>
 </head>
@@ -72,234 +51,281 @@ button:hover{transform:scale(1.02)}
 
 <div class="wrap">
 
-  <div class="card">
-    <span class="badge">PASS THE PHONE GAME</span>
-    <h1>Word Imposter 😂</h1>
-    <p class="small">Everyone gets one word. One unlucky fellow is the imposter. Talk, roast, suspect, vote.</p>
+<div class="card">
+  <span class="badge">FUNNY PARTY GAME</span>
+  <h1>Word Imposter Pro 😂</h1>
+  <p class="small">Same word for everyone. One imposter gets only a hint. Each round has a question to expose them.</p>
+</div>
+
+<div id="setup" class="card">
+  <h2>Setup</h2>
+  <select id="playerCount" onchange="makeInputs()">
+    <option value="3">3 Players</option>
+    <option value="4">4 Players</option>
+    <option value="5">5 Players</option>
+    <option value="6">6 Players</option>
+    <option value="7">7 Players</option>
+    <option value="8">8 Players</option>
+  </select>
+
+  <div id="nameInputs"></div>
+
+  <select id="category">
+    <option value="funny">Funny</option>
+    <option value="food">Food</option>
+    <option value="upsc">UPSC Macha Mode</option>
+    <option value="love">Relationship Drama</option>
+    <option value="chaos">Random Chaos</option>
+  </select>
+
+  <button onclick="startGame()">Start Game 🚀</button>
+</div>
+
+<div id="reveal" class="card hidden">
+  <h2>Secret Reveal</h2>
+  <p class="small">Pass phone secretly. Don’t peep, dei.</p>
+
+  <div class="box">
+    <div id="currentPlayer" class="big"></div>
+    <p id="secretText">Tap reveal.</p>
+    <button class="blue" onclick="showSecret()">Reveal 👀</button>
+    <button class="green" onclick="nextReveal()">Hide & Pass ➡️</button>
+  </div>
+</div>
+
+<div id="roundScreen" class="card hidden">
+  <h2 id="roundTitle">Round 1</h2>
+
+  <div class="box">
+    <p class="small">Question to test the imposter:</p>
+    <div id="roundQuestion" class="big"></div>
   </div>
 
-  <div id="setup" class="card">
-    <h2>Game Setup</h2>
+  <button class="purple" onclick="nextQuestion()">Next Round Question 🔥</button>
+  <button class="blue" onclick="showHint()">Show Public Hint</button>
+  <button class="red" onclick="goVote()">Vote Imposter 🗳️</button>
 
-    <select id="playerCount" onchange="makeNameInputs()">
-      <option value="3">3 Players</option>
-      <option value="4">4 Players</option>
-      <option value="5">5 Players</option>
-      <option value="6">6 Players</option>
-      <option value="7">7 Players</option>
-      <option value="8">8 Players</option>
-    </select>
+  <div id="publicHint" class="box hidden"></div>
+</div>
 
-    <div id="nameInputs"></div>
-
-    <select id="category">
-      <option value="funny">Funny Words</option>
-      <option value="food">Food</option>
-      <option value="upsc">UPSC Macha Mode</option>
-      <option value="relationship">Relationship Drama</option>
-      <option value="random">Random Chaos</option>
-    </select>
-
-    <button onclick="startGame()">Start Game 🚀</button>
-  </div>
-
-  <div id="reveal" class="card hidden">
-    <h2>Secret Reveal</h2>
-    <p class="small">Pass phone to the player shown. Don’t let others see.</p>
-
-    <div class="playerBox">
-      <div id="currentPlayer" class="big"></div>
-      <p id="secretText" class="small">Tap reveal to see your word.</p>
-      <button class="blue" onclick="showWord()">Reveal My Word 👀</button>
-      <button class="green" onclick="nextPlayer()">Hide & Pass Phone ➡️</button>
-    </div>
-  </div>
-
-  <div id="discussion" class="card hidden">
-    <h2>Discussion Time 🔥</h2>
-    <p>Now talk like detectives. Ask weird questions. Don’t say the exact word.</p>
-
-    <div class="playerBox">
-      <p id="timer" class="big">02:00</p>
-      <button onclick="startTimer()">Start Timer ⏱️</button>
-      <button class="red" onclick="showVoting()">Go To Voting 🗳️</button>
-    </div>
-
-    <div class="card">
-      <h3>Funny Question Ideas</h3>
-      <p id="funQuestion"></p>
-      <button class="blue" onclick="randomQuestion()">Give Funny Question 😂</button>
-    </div>
-  </div>
-
-  <div id="voting" class="card hidden">
-    <h2>Vote the Imposter 🕵️</h2>
-    <div id="voteButtons"></div>
-    <div id="result" class="playerBox hidden"></div>
-  </div>
+<div id="voteScreen" class="card hidden">
+  <h2>Vote Now 🕵️</h2>
+  <p class="small">Choose the person who acted most suspicious.</p>
+  <div id="voteButtons"></div>
+  <div id="result" class="box hidden"></div>
+</div>
 
 </div>
 
 <script>
-let players = [];
-let imposterIndex = 0;
-let word = "";
-let currentIndex = 0;
-let revealed = false;
-let timerInterval;
+let players=[], scores=[], wordObj={}, imposter=0, current=0, round=1;
 
-const wordBank = {
-  funny:[
-    "Bathroom Singer","Exam Hall Panic","Fake Laugh","Stolen Slipper",
-    "Overacting Friend","Silent Fart","Bad Haircut","Low Battery"
-  ],
-  food:[
-    "Biryani","Parotta","Momos","Pani Puri",
-    "Curd Rice","Maggi","Samosa","Dosa"
-  ],
-  upsc:[
-    "Polity","Prelims Panic","Laxmikanth","Current Affairs",
-    "Optional Subject","CSAT Trauma","Mains Answer","Revision"
-  ],
-  relationship:[
-    "Seen Zone","Sorry Message","Breakup Drama","Long Call",
-    "Jealousy","Birthday Gift","Late Reply","Miss You"
-  ],
-  random:[
-    "Alien Cow","Dancing Chair","WiFi Thief","Lazy Ghost",
-    "Angry Pigeon","Drama Queen","Suspicious Roommate","Zombie Uncle"
-  ]
+const data = {
+ funny:[
+  {word:"Bathroom Singer",hint:"Related to private concert"},
+  {word:"Silent Fart",hint:"Danger without sound"},
+  {word:"Fake Laugh",hint:"Social survival tool"},
+  {word:"Bad Haircut",hint:"Mirror trauma"},
+  {word:"WiFi Thief",hint:"Neighbourhood criminal"},
+  {word:"Overacting Friend",hint:"Drama unlimited"}
+ ],
+ food:[
+  {word:"Biryani",hint:"Rice item with emotions"},
+  {word:"Parotta",hint:"Layered happiness"},
+  {word:"Momos",hint:"Delhi street addiction"},
+  {word:"Curd Rice",hint:"South Indian peace treaty"},
+  {word:"Maggi",hint:"2 minute lie"},
+  {word:"Pani Puri",hint:"Crispy water bomb"}
+ ],
+ upsc:[
+  {word:"Laxmikanth",hint:"Polity bible"},
+  {word:"CSAT",hint:"Dream killer paper"},
+  {word:"Current Affairs",hint:"Never ending headache"},
+  {word:"Prelims",hint:"OMR battlefield"},
+  {word:"Optional",hint:"Second marriage of UPSC"},
+  {word:"Revision",hint:"Forgotten again"}
+ ],
+ love:[
+  {word:"Seen Zone",hint:"Pain without words"},
+  {word:"Sorry Message",hint:"Long paragraph weapon"},
+  {word:"Jealousy",hint:"Love with detective mode"},
+  {word:"Late Reply",hint:"Relationship earthquake"},
+  {word:"Miss You",hint:"Midnight weakness"},
+  {word:"Breakup Drama",hint:"Tears and typing"}
+ ],
+ chaos:[
+  {word:"Zombie Uncle",hint:"Family horror"},
+  {word:"Angry Pigeon",hint:"Flying rowdy"},
+  {word:"Dancing Chair",hint:"Furniture with talent"},
+  {word:"Alien Cow",hint:"Space animal"},
+  {word:"Suspicious Roommate",hint:"Flat investigation"},
+  {word:"Lazy Ghost",hint:"Haunting postponed"}
+ ]
 };
 
-const funnyQuestions = [
-  "If this word had a smell, would it be dangerous?",
-  "Would your ex understand this word?",
-  "Can this word survive in Old Rajinder Nagar rent?",
-  "Is this word more useful than CSAT?",
-  "Would you take this word to a first date?",
-  "Can this word win Bigg Boss?",
-  "Would your mom approve this word?",
-  "Is this word found in a bachelor room?"
+const questions = [
+ "Describe it using only one emotion.",
+ "Where will you find this in real life?",
+ "Would you keep this in your room? Why?",
+ "Explain it like you are lying to your parents.",
+ "Give one benefit without saying the word.",
+ "Rate it out of 10 and explain.",
+ "What type of person likes this?",
+ "Can this survive in Delhi rent life?",
+ "Compare it with your ex.",
+ "What sound would it make?",
+ "What would happen if this became Prime Minister?",
+ "Use one Tamil/Hindi slang to describe it.",
+ "Is this dangerous after midnight?",
+ "Would you gift this to your crush?",
+ "Explain it in 5 words only."
 ];
 
-function makeNameInputs(){
-  let count = Number(playerCount.value);
-  nameInputs.innerHTML = "";
-  for(let i=0;i<count;i++){
-    nameInputs.innerHTML += `<input id="p${i}" placeholder="Player ${i+1} name" value="Player ${i+1}">`;
-  }
+const roasts = [
+ "Caught like thief stealing hostel Maggi 😂",
+ "Imposter acted like UPSC topper without syllabus 🤡",
+ "Full drama, zero knowledge 😂",
+ "Sherlock Holmes would be proud macha 🕵️",
+ "Imposter confidence was higher than EB bill 😭"
+];
+
+function makeInputs(){
+ let count=+playerCount.value;
+ nameInputs.innerHTML="";
+ for(let i=0;i<count;i++){
+  nameInputs.innerHTML += `<input id="p${i}" placeholder="Player ${i+1}" value="Player ${i+1}">`;
+ }
 }
-makeNameInputs();
+makeInputs();
 
 function startGame(){
-  let count = Number(playerCount.value);
-  players = [];
+ let count=+playerCount.value;
+ players=[]; scores=[];
+ for(let i=0;i<count;i++){
+  players.push(document.getElementById("p"+i).value || `Player ${i+1}`);
+  scores.push(0);
+ }
+ let list=data[category.value];
+ wordObj=list[Math.floor(Math.random()*list.length)];
+ imposter=Math.floor(Math.random()*players.length);
+ current=0; round=1;
 
-  for(let i=0;i<count;i++){
-    players.push(document.getElementById("p"+i).value || "Player "+(i+1));
-  }
-
-  let list = wordBank[category.value];
-  word = list[Math.floor(Math.random()*list.length)];
-  imposterIndex = Math.floor(Math.random()*players.length);
-  currentIndex = 0;
-
-  setup.classList.add("hidden");
-  reveal.classList.remove("hidden");
-  updateReveal();
+ setup.classList.add("hidden");
+ reveal.classList.remove("hidden");
+ updateReveal();
 }
 
 function updateReveal(){
-  currentPlayer.innerHTML = players[currentIndex];
-  secretText.innerHTML = "Tap reveal to see your word.";
-  revealed = false;
+ currentPlayer.innerHTML=players[current];
+ secretText.innerHTML="Tap reveal to see your secret.";
 }
 
-function showWord(){
-  if(revealed) return;
-
-  if(currentIndex === imposterIndex){
-    secretText.innerHTML = `
-      <div class="big">IMPOSTER 😈</div>
-      <p>Your job: act like you know the word.</p>
-    `;
-  } else {
-    secretText.innerHTML = `
-      <div class="big">${word}</div>
-      <p>Don’t say it directly!</p>
-    `;
-  }
-
-  revealed = true;
+function showSecret(){
+ if(current===imposter){
+  secretText.innerHTML=`
+   <div class="big">YOU ARE IMPOSTER 😈</div>
+   <p>Hint: <b>${wordObj.hint}</b></p>
+   <p class="small">Act confident. Don’t overact like serial villain.</p>
+  `;
+ }else{
+  secretText.innerHTML=`
+   <div class="big">${wordObj.word}</div>
+   <p class="small">Don’t say the exact word.</p>
+  `;
+ }
 }
 
-function nextPlayer(){
-  if(!revealed){
-    alert("Reveal first macha!");
-    return;
-  }
-
-  currentIndex++;
-
-  if(currentIndex >= players.length){
-    reveal.classList.add("hidden");
-    discussion.classList.remove("hidden");
-    randomQuestion();
-  } else {
-    updateReveal();
-  }
+function nextReveal(){
+ current++;
+ if(current>=players.length){
+  reveal.classList.add("hidden");
+  roundScreen.classList.remove("hidden");
+  loadQuestion();
+ }else updateReveal();
 }
 
-function startTimer(){
-  let time = 120;
-  clearInterval(timerInterval);
-
-  timerInterval = setInterval(()=>{
-    let m = Math.floor(time/60);
-    let s = time%60;
-    timer.innerHTML = `${String(m).padStart(2,"0")}:${String(s).padStart(2,"0")}`;
-    time--;
-
-    if(time < 0){
-      clearInterval(timerInterval);
-      timer.innerHTML = "TIME UP 😂";
-    }
-  },1000);
+function loadQuestion(){
+ roundTitle.innerHTML=`Round ${round}`;
+ roundQuestion.innerHTML=questions[Math.floor(Math.random()*questions.length)];
+ publicHint.classList.add("hidden");
 }
 
-function randomQuestion(){
-  funQuestion.innerHTML = funnyQuestions[Math.floor(Math.random()*funnyQuestions.length)];
+function nextQuestion(){
+ round++;
+ if(round>5){
+  goVote();
+ }else{
+  loadQuestion();
+ }
 }
 
-function showVoting(){
-  discussion.classList.add("hidden");
-  voting.classList.remove("hidden");
+function showHint(){
+ publicHint.classList.remove("hidden");
+ publicHint.innerHTML=`
+  <h3>Public Hint 🧠</h3>
+  <p>${wordObj.hint}</p>
+  <p class="small">Careful: imposter also knows this hint.</p>
+ `;
+}
 
-  voteButtons.innerHTML = "";
-  players.forEach((p,i)=>{
-    voteButtons.innerHTML += `<button onclick="vote(${i})">${p}</button>`;
-  });
+function goVote(){
+ roundScreen.classList.add("hidden");
+ voteScreen.classList.remove("hidden");
+ voteButtons.innerHTML="";
+ players.forEach((p,i)=>{
+  voteButtons.innerHTML += `<button onclick="vote(${i})">${p}</button>`;
+ });
 }
 
 function vote(i){
-  result.classList.remove("hidden");
+ result.classList.remove("hidden");
+ let roast=roasts[Math.floor(Math.random()*roasts.length)];
 
-  if(i === imposterIndex){
-    result.innerHTML = `
-      <h2>Correct 😂</h2>
-      <p><b>${players[imposterIndex]}</b> was the imposter.</p>
-      <p>The word was: <b>${word}</b></p>
-      <button onclick="location.reload()">Play Again</button>
-    `;
-  } else {
-    result.innerHTML = `
-      <h2>Wrong 🤡</h2>
-      <p>You voted <b>${players[i]}</b>.</p>
-      <p>Real imposter was <b>${players[imposterIndex]}</b>.</p>
-      <p>The word was: <b>${word}</b></p>
-      <button onclick="location.reload()">Play Again</button>
-    `;
-  }
+ if(i===imposter){
+  players.forEach((p,idx)=>{
+   if(idx!==imposter) scores[idx]+=1;
+  });
+
+  result.innerHTML=`
+   <h2>Correct! 😂</h2>
+   <p><b>${players[imposter]}</b> was the imposter.</p>
+   <p>Word was: <b>${wordObj.word}</b></p>
+   <p>${roast}</p>
+   ${scoreBoard()}
+   <button onclick="newRound()">Next Game</button>
+  `;
+ }else{
+  scores[imposter]+=2;
+  result.innerHTML=`
+   <h2>Wrong Vote 🤡</h2>
+   <p>You blamed <b>${players[i]}</b>.</p>
+   <p>Real imposter: <b>${players[imposter]}</b></p>
+   <p>Word was: <b>${wordObj.word}</b></p>
+   <p>Imposter escaped like rent due date 😭</p>
+   ${scoreBoard()}
+   <button onclick="newRound()">Next Game</button>
+  `;
+ }
+}
+
+function scoreBoard(){
+ let html="<hr><h3>Scoreboard 🏆</h3>";
+ players.forEach((p,i)=>{
+  html += `${p}: ${scores[i]} points<br>`;
+ });
+ return html;
+}
+
+function newRound(){
+ let list=data[category.value];
+ wordObj=list[Math.floor(Math.random()*list.length)];
+ imposter=Math.floor(Math.random()*players.length);
+ current=0; round=1;
+
+ voteScreen.classList.add("hidden");
+ result.classList.add("hidden");
+ reveal.classList.remove("hidden");
+ updateReveal();
 }
 </script>
 
